@@ -1,0 +1,71 @@
+Tell us about yourself and why you applied for this role.
+
+Sample Answer:
+
+    I’m Noor, a Junior Data Analyst with a strong foundation in Python, SQL, Power BI, and statistical analysis. My academic background in computer science, combined with practical experience in data wrangling, dashboard creation, and reporting, has shaped my passion for turning data into meaningful solutions.
+
+    I’m particularly drawn to this Junior Developer role at SSC because of its focus on solving real-world challenges through agile innovation. I thrive in collaborative, mission-driven environments, and I see this as a natural extension of my journey—from supporting business decisions with data to building scalable, tech-forward solutions.
+
+2. Tell us about a project you’ve worked on. What challenges did you face?
+
+Sample Answer:
+
+    During my Level 4 Data Analytics Bootcamp, I worked on a capstone project that involved building an end-to-end sales analysis dashboard using Python and Power BI. The dataset was incomplete and messy, requiring extensive cleaning using Pandas and NumPy. I applied statistical techniques for missing value imputation and then visualised trends using Power BI dashboards to present insights on customer behavior and profit drivers.
+
+    One major challenge was reconciling inconsistent data entries and automating the data pipeline. I overcame it by writing Python scripts to validate and reshape the data, which drastically improved the reporting accuracy. This reinforced the importance of data integrity in delivering decision-ready insights.
+
+3. Which language or tech tool are you most comfortable with, and how have you used it?
+
+Sample Answer:
+
+    I’m most confident in Python and SQL. I regularly use Python libraries like Pandas, NumPy, and Seaborn for data cleaning, statistical analysis, and creating data visualisations. With SQL, I’ve built complex queries in SSMS for extracting insights, optimizing performance, and automating reports.
+
+    In a previous role as a Data Assistant at NOVA, I used SQL to maintain databases and support stakeholder reporting. More recently, I used Python to scrape data for sentiment analysis and presented my findings through interactive dashboards using Power BI.
+
+4. How do you approach learning new technologies?
+
+Sample Answer:
+
+    I follow a structured learning path—starting with documentation and tutorials, applying the knowledge in a real-world context, and then reflecting through mini-projects. For example, I recently learned BeautifulSoup for web scraping by building a script that collected product data and analysed pricing trends.
+
+    I also frequently explore new data visualisation tools like Tableau, and cloud concepts via Microsoft’s certification paths. I thrive in fast-paced environments where continuous learning is not just encouraged but necessary.
+
+5. Have you worked in Agile before? If not, how would you adapt?
+
+Sample Answer:
+
+    While I haven’t worked in a formal Agile team yet, I’ve been trained in Agile methodologies and incorporated its principles during my bootcamp group projects—breaking down features into sprints, using Kanban boards for task tracking, and conducting retrospectives.
+
+    I value Agile’s iterative feedback loop and its focus on delivering functional solutions. My adaptability and strong organisational skills make me well-suited to thrive in such environments.
+
+6. Can you describe a time when you had to learn a new technology or skill quickly?
+
+Sample Answer:
+
+    Yes—during my Bootcamp, I had to quickly master Power BI for a client-style project. I had prior experience in Excel dashboards, but Power BI was new to me. I dedicated evenings to Microsoft’s tutorials, YouTube deep-dives, and practice exercises.
+
+    Within a week, I developed a dynamic dashboard tracking customer churn and sales metrics. It received positive feedback for its clarity and business impact. This experience taught me how to accelerate learning through structure, community support, and rapid iteration.
+
+7. How would you handle a vague client request like “make the system more user-friendly”?
+
+Sample Answer:
+
+    First, I would ask clarifying questions to understand what “user-friendly” means to them — whether it’s layout simplicity, performance, or ease of navigation. I’d then map user pain points through user testing or stakeholder interviews, propose design improvements, and present mockups or wireframes to iterate quickly.
+
+    My background in customer service has helped me translate technical concepts for non-technical audiences. I’ve used those skills to improve reporting interfaces and simplify workflows for internal teams, making sure the tools align with the users’ actual needs.
+
+8. Tell us about a time you worked in a team. How did you contribute?
+
+Sample Answer:
+
+    At Zeemu Ltd, although my official role was in customer service, I collaborated across departments to build Excel tools that tracked KPIs and streamlined operations. I facilitated meetings, gathered requirements, and built templates that were later adopted company-wide.
+
+    Similarly, in my bootcamp, I worked in a peer-led group to design a data project from scratch. My contribution included scripting the data transformation process and integrating the visualisation layer. These experiences taught me how to combine technical delivery with interpersonal collaboration.
+
+9. What are you hoping to gain from this role?
+
+Sample Answer:
+
+    I’m looking to evolve from a data-focused role into a well-rounded software developer, while still bringing my analytical strengths to the table. I see SSC’s multi-sector, project-based approach as the ideal environment to expand my technical scope—from databases and APIs to cloud and full-stack concepts.
+
+    I also want to contribute meaningfully to your client outcomes while developing deeper specialisations in areas like data engineering, system design, or cloud solutions.

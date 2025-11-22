@@ -1,0 +1,14 @@
+# Simple Python test code
+
+# Print a greeting
+print("Hello, Jupyter Notebook!")
+
+# Basic math
+a = 12
+b = 8
+sum_ab = a + b
+print(f"The sum of {a} and {b} is {sum_ab}")
+
+# A quick list comprehension
+squares = [x**2 for x in range(1, 6)]
+print("Squares:", squares)

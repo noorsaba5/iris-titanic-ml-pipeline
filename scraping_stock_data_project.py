@@ -1,213 +1,157 @@
+# Essential Imports for Data Operations
 
-# Import Required Modules
-
-
-import yfinance as yf                 # For fetching financial data
-import pandas as pd                  # For data manipulation
-import numpy as np                   # For numerical operations
-import matplotlib.pyplot as plt      # For plotting
-import seaborn as sns                # For enhanced visualization
-import sqlite3                       # For in-memory SQL-based operations
-from statsmodels.tsa.arima.model import ARIMA  # For time-series forecasting
+import yfinance as yf
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import sqlite3
+from statsmodels.tsa.arima.model import ARIMA
 
 
-# Stock and Crypto Fetching
+# Retrieve Stock and Cryptocurrency Information
+
+def get_stock_prices(symbols, duration="6mo"):
+    dataset = yf.download(symbols, period=duration, group_by='ticker', auto_adjust=True)
+    return dataset
+
+def stock_snapshot(symbol):
+    asset = yf.Ticker(symbol)
+    print(f"\nDetails for: {symbol}")
+    print("Market Capitalization:", asset.info.get("marketCap", "Unavailable"))
+    print("Trailing P/E Ratio:", asset.info.get("trailingPE", "Unavailable"))
+    print("Yield (Dividend):", asset.info.get("dividendYield", "Unavailable"))
+    print("Dividend History:\n", asset.dividends.tail())
+    print("Stock Splits:\n", asset.splits.tail())
+    print("Income Statement:\n", asset.financials.head())
+    print("Balance Sheet:\n", asset.balance_sheet.head())
+    print("Cash Flow Summary:\n", asset.cashflow.head())
+    print("Latest Analyst Opinions:\n", asset.recommendations.tail())
+    if asset.options:
+        print("Options Dates Available:", asset.options)
+
+def crypto_summary(crypto_symbol):
+    crypto_asset = yf.Ticker(crypto_symbol)
+    print(f"\nCrypto Summary for {crypto_symbol}:\n")
+    print(crypto_asset.history(period="1mo"))
+
+def export_to_csv(df, filename):
+    df.to_csv(filename)
+    print(f"File exported: {filename}")
 
 
-# Download historical stock data from Yahoo Finance
-def fetch_stock_data(tickers, period="6mo"):
-    data = yf.download(tickers, period=period, group_by='ticker', auto_adjust=True)
-    return data
+# Visual Representation of Market Data
 
-# Display detailed information for a specific stock
-def fetch_additional_info(ticker):
-    stock = yf.Ticker(ticker)
-    print(f"\nFetching additional data for {ticker}...")
-    print("Market Cap:", stock.info.get("marketCap", "N/A"))
-    print("P/E Ratio:", stock.info.get("trailingPE", "N/A"))
-    print("Dividend Yield:", stock.info.get("dividendYield", "N/A"))
-    print("Recent Dividends:\n", stock.dividends.tail())
-    print("Stock Splits:\n", stock.splits.tail())
-    print("Financials:\n", stock.financials.head())
-    print("Balance Sheet:\n", stock.balance_sheet.head())
-    print("Cash Flow Statement:\n", stock.cashflow.head())
-    print("Analyst Recommendations:\n", stock.recommendations.tail())
-    if stock.options:
-        print("Available Option Expiration Dates:", stock.options)
+def display_dashboard(history, symbols):
+    fig, axs = plt.subplots(3, 2, figsize=(15, 18), constrained_layout=True)
+    axs = axs.flatten()
 
-# Fetch recent data for a cryptocurrency
-def fetch_crypto_data(crypto_ticker):
-    crypto = yf.Ticker(crypto_ticker)
-    print(f"\nFetching cryptocurrency data for {crypto_ticker}...")
-    print(crypto.history(period="1mo"))
+    for ticker in symbols:
+        history[ticker]['Close'].plot(ax=axs[0], label=f'{ticker} Price')
+    axs[0].set_title('Price Movement')
+    axs[0].legend()
+    axs[0].grid(True)
 
-# Save any DataFrame to a CSV file
-def save_to_csv(data, filename):
-    data.to_csv(filename)
-    print(f"Data saved to {filename}")
+    closing_df = pd.DataFrame({sym: history[sym]['Close'] for sym in symbols})
+    sns.heatmap(closing_df.corr(), annot=True, cmap='coolwarm', ax=axs[1])
+    axs[1].set_title('Price Correlation')
 
+    volumes = pd.DataFrame({sym: history[sym]['Volume'] for sym in symbols})
+    volumes.plot(ax=axs[2])
+    axs[2].set_title('Trade Volume Trends')
 
-# Dashboard Visualization
+    returns_df = closing_df.pct_change()
+    returns_df.plot(ax=axs[3])
+    axs[3].set_title('Percentage Returns')
 
-
-# Build and display plots for multiple aspects of stock behavior
-def visualization_dashboard(stock_history, tickers):
-    fig, axes = plt.subplots(3, 2, figsize=(15, 18), constrained_layout=True)
-    axes = axes.flatten()
-
-    # Closing price trends
-    for ticker in tickers:
-        stock_history[ticker]['Close'].plot(ax=axes[0], label=f'{ticker} Closing Price')
-    axes[0].set_title('Closing Price Trends')
-    axes[0].legend()
-    axes[0].grid()
-
-    # Correlation matrix of closing prices
-    close_prices = pd.DataFrame({ticker: stock_history[ticker]['Close'] for ticker in tickers})
-    sns.heatmap(close_prices.corr(), annot=True, cmap='coolwarm', ax=axes[1])
-    axes[1].set_title('Correlation Matrix')
-
-    # Volume trends
-    volume = pd.DataFrame({ticker: stock_history[ticker]['Volume'] for ticker in tickers})
-    volume.plot(ax=axes[2])
-    axes[2].set_title('Trading Volume Trends')
-
-    # Daily returns
-    daily_returns = close_prices.pct_change()
-    daily_returns.plot(ax=axes[3])
-    axes[3].set_title('Daily Returns')
-
-    # Daily returns distribution (histograms with KDE)
-    for i, ticker in enumerate(tickers[:2]):
-        sns.histplot(daily_returns[ticker].dropna(), kde=True, ax=axes[4 + i], color='orange')
-        axes[4 + i].set_title(f'{ticker} Daily Returns Distribution')
+    for i, sym in enumerate(symbols[:2]):
+        sns.histplot(returns_df[sym].dropna(), kde=True, ax=axs[4 + i], color='orange')
+        axs[4 + i].set_title(f'{sym} Return Distribution')
 
     plt.show()
 
 
-# Advanced SQL + ARIMA Analysis
+# Data Science Workflow: SQL, Forecasting, Risk Analysis
 
+def run_analysis():
+    apple_data = pd.read_csv('AAPL_stock_data.csv')
+    all_stocks = pd.read_csv('stocks_data.csv', skiprows=2)
 
-def advanced_analysis():
-    # Load previously saved CSVs
-    apple_df = pd.read_csv('AAPL_stock_data.csv')
-    stocks_df = pd.read_csv('stocks_data.csv', skiprows=2)
-
-    # Rename columns for clarity and consistency
-    stocks_df.columns = [
-        'Date', 'AAPL_Close', 'GOOGL_Close', 'TSLA_Close',
-        'AAPL_High', 'GOOGL_High', 'TSLA_High',
-        'AAPL_Low', 'GOOGL_Low', 'TSLA_Low',
-        'AAPL_Open', 'GOOGL_Open', 'TSLA_Open',
-        'AAPL_Volume', 'GOOGL_Volume', 'TSLA_Volume'
+    all_stocks.columns = [
+        'Date', 'AAPL_C', 'GOOGL_C', 'TSLA_C',
+        'AAPL_H', 'GOOGL_H', 'TSLA_H',
+        'AAPL_L', 'GOOGL_L', 'TSLA_L',
+        'AAPL_O', 'GOOGL_O', 'TSLA_O',
+        'AAPL_V', 'GOOGL_V', 'TSLA_V'
     ]
 
-    # Convert date columns to datetime format
-    apple_df['Date'] = pd.to_datetime(apple_df['Date'], utc=True).dt.tz_convert(None)
-    stocks_df['Date'] = pd.to_datetime(stocks_df['Date'])
+    apple_data['Date'] = pd.to_datetime(apple_data['Date'], utc=True).dt.tz_localize(None)
+    all_stocks['Date'] = pd.to_datetime(all_stocks['Date'])
 
-    # Create in-memory SQLite database and load data
-    conn = sqlite3.connect(':memory:')
-    apple_df.to_sql('apple_stock', conn, index=False)
-    stocks_df.to_sql('stocks', conn, index=False)
+    connection = sqlite3.connect(':memory:')
+    apple_data.to_sql('apple_tbl', connection, index=False)
+    all_stocks.to_sql('stocks_tbl', connection, index=False)
 
-    # Join Apple and other stock data on the same date
-    query = """
-    SELECT a.Date, a.Open AS AAPL_Open_1, a.High AS AAPL_High_1, a.Low AS AAPL_Low_1, a.Close AS AAPL_Close_1, a.Volume AS AAPL_Volume_1,
-           s.AAPL_Open AS AAPL_Open_2, s.AAPL_High AS AAPL_High_2, s.AAPL_Low AS AAPL_Low_2, s.AAPL_Close AS AAPL_Close_2, s.AAPL_Volume AS AAPL_Volume_2,
-           s.GOOGL_Open, s.GOOGL_High, s.GOOGL_Low, s.GOOGL_Close, s.GOOGL_Volume,
-           s.TSLA_Open, s.TSLA_High, s.TSLA_Low, s.TSLA_Close, s.TSLA_Volume
-    FROM apple_stock a
-    JOIN stocks s ON date(a.Date) = date(s.Date)
+    sql = """
+    SELECT a.Date, a.Open AS Apple_Open, a.High AS Apple_High, a.Low AS Apple_Low, a.Close AS Apple_Close, a.Volume AS Apple_Volume,
+           s.AAPL_O, s.AAPL_H, s.AAPL_L, s.AAPL_C, s.AAPL_V,
+           s.GOOGL_O, s.GOOGL_H, s.GOOGL_L, s.GOOGL_C, s.GOOGL_V,
+           s.TSLA_O, s.TSLA_H, s.TSLA_L, s.TSLA_C, s.TSLA_V
+    FROM apple_tbl a
+    JOIN stocks_tbl s ON date(a.Date) = date(s.Date)
     """
-    combined_df = pd.read_sql(query, conn, parse_dates=['Date'])
-    combined_df.set_index('Date', inplace=True)
 
-    # Calculate daily percentage returns
-    combined_df['AAPL_Return'] = combined_df['AAPL_Close_2'].pct_change()
-    combined_df['GOOGL_Return'] = combined_df['GOOGL_Close'].pct_change()
-    combined_df['TSLA_Return'] = combined_df['TSLA_Close'].pct_change()
+    merged = pd.read_sql(sql, connection, parse_dates=['Date']).set_index('Date')
 
-    # Calculate volatility (standard deviation of returns)
-    volatility = combined_df[['AAPL_Return', 'GOOGL_Return', 'TSLA_Return']].std()
+    merged['Apple_Ret'] = merged['AAPL_C'].pct_change()
+    merged['Google_Ret'] = merged['GOOGL_C'].pct_change()
+    merged['Tesla_Ret'] = merged['TSLA_C'].pct_change()
 
-    # Apply ARIMA model to forecast AAPL prices
-    model = ARIMA(combined_df['AAPL_Close_2'].dropna(), order=(5, 1, 0))
-    model_fit = model.fit()
-    forecast = model_fit.forecast(steps=15)
+    volatility_data = merged[['Apple_Ret', 'Google_Ret', 'Tesla_Ret']].std()
 
-    # Value at Risk (VaR) and Conditional VaR (CVaR) calculation
-    var_cvar = {}
-    confidence = 0.95
-    for stock in ['AAPL_Return', 'GOOGL_Return', 'TSLA_Return']:
-        var = np.percentile(combined_df[stock].dropna(), (1 - confidence) * 100)
-        cvar = combined_df[stock][combined_df[stock] <= var].mean()
-        var_cvar[stock] = {'VaR': var, 'CVaR': cvar}
+    model = ARIMA(merged['AAPL_C'].dropna(), order=(5, 1, 0))
+    result = model.fit()
+    future = result.forecast(steps=15)
 
-    # Correlation matrix for prices and volume
-    corr_matrix = combined_df[['AAPL_Close_2', 'GOOGL_Close', 'TSLA_Close', 'AAPL_Volume_2', 'GOOGL_Volume', 'TSLA_Volume']].corr()
+    risk = {}
+    threshold = 0.95
+    for col in ['Apple_Ret', 'Google_Ret', 'Tesla_Ret']:
+        value_at_risk = np.percentile(merged[col].dropna(), (1 - threshold) * 100)
+        conditional_var = merged[col][merged[col] <= value_at_risk].mean()
+        risk[col] = {'VaR': value_at_risk, 'CVaR': conditional_var}
 
-    
-    # Dashboard Visualization
-    
+    corr_data = merged[['AAPL_C', 'GOOGL_C', 'TSLA_C', 'AAPL_V', 'GOOGL_V', 'TSLA_V']].corr()
 
-    fig, axes = plt.subplots(3, 2, figsize=(15, 18))
+    fig, axs = plt.subplots(3, 2, figsize=(15, 18))
 
-    # Heatmap of correlations
-    sns.heatmap(corr_matrix, annot=True, ax=axes[0, 0])
-    axes[0, 0].set_title('Correlation Matrix')
+    sns.heatmap(corr_data, annot=True, ax=axs[0, 0])
+    axs[0, 0].set_title('Correlation Heatmap')
 
-    # ARIMA Forecast Plot
-    forecast.plot(ax=axes[0, 1], title='AAPL Forecast')
-    axes[0, 1].set_xlabel('Days')
-    axes[0, 1].set_ylabel('Price')
+    future.plot(ax=axs[0, 1], title='AAPL Forecast (ARIMA)')
+    axs[0, 1].set_xlabel('Time Steps')
+    axs[0, 1].set_ylabel('Predicted Price')
 
-    # Daily Returns Plot
-    daily_returns = combined_df[['AAPL_Return', 'GOOGL_Return', 'TSLA_Return']]
-    daily_returns.plot(ax=axes[1, 0], title='Daily Returns')
+    merged[['Apple_Ret', 'Google_Ret', 'Tesla_Ret']].plot(ax=axs[1, 0], title='Return Trends')
 
-    # Volatility as bar plot
-    volatility.plot.bar(ax=axes[1, 1], title='Volatility')
+    volatility_data.plot.bar(ax=axs[1, 1], title='Market Volatility')
 
-    # Cumulative returns over time
-    cumulative_returns = (1 + daily_returns).cumprod()
-    cumulative_returns.plot(ax=axes[2, 0], title='Cumulative Returns')
+    (1 + merged[['Apple_Ret', 'Google_Ret', 'Tesla_Ret']]).cumprod().plot(ax=axs[2, 0], title='Growth of $1 Investment')
 
-    # Difference between two sources of AAPL closing price
-    combined_df['AAPL_Close_Diff'] = combined_df['AAPL_Close_1'] - combined_df['AAPL_Close_2']
-    combined_df['AAPL_Close_Diff'].plot(ax=axes[2, 1], marker='o', linestyle='', title='AAPL Closing Price Difference')
-    axes[2, 1].axhline(0, color='gray', linestyle='--')
+    merged['Close_Diff'] = merged['Apple_Close'] - merged['AAPL_C']
+    merged['Close_Diff'].plot(ax=axs[2, 1], marker='o', linestyle='', title='AAPL Close Price Variance')
+    axs[2, 1].axhline(0, color='gray', linestyle='--')
 
     plt.tight_layout()
     plt.show()
-    conn.close()
+    connection.close()
 
 
-# Main Execution Block
-
+# Driver Code
 
 if __name__ == "__main__":
-    # Get stock tickers from user
-    tickers = input("Enter stock ticker symbols separated by commas (e.g., AAPL, TSLA, GOOGL): ").split(",")
-    tickers = [t.strip().upper() for t in tickers]
+    stock_list = input("Enter stock tickers separated by commas (e.g. AAPL, GOOGL, TSLA): ").split(",")
+    stock_list = [ticker.strip().upper() for ticker in stock_list]
 
-    # Fetch and save stock data
-    hist = fetch_stock_data(tickers)
-    save_to_csv(hist, "stocks_data.csv")
-
-    # Visual analysis dashboard
-    visualization_dashboard(hist, tickers)
-
-    # Optional: fetch additional info for each ticker
-    for ticker in tickers:
-        fetch_additional_info(ticker)
-
-    # Optional: Crypto data
-    crypto_ticker = input("Enter cryptocurrency ticker (e.g., BTC-USD) or press Enter to skip: ")
-    if crypto_ticker:
-        fetch_crypto_data(crypto_ticker)
-
-    # Optional: Run advanced SQLite + ARIMA dashboard
-    run_advanced = input("\nDo you want to run the advanced SQLite/ARIMA analysis (requires 'AAPL_stock_data.csv')? [y/n]: ").strip().lower()
-    if run_advanced == 'y':
-        advanced_analysis()
+    price_data = get_stock_prices(stock_list)
+    export_to_csv(price_data, "stocks_data.csv")
+    display_dashboard(price_data, stock_list)
